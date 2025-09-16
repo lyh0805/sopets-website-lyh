@@ -1,6 +1,0 @@
-id,email,discord_username,telegram_handle,playstyle,playstyle_other,discovery_source,discovery_source_other,game_genres,created_at,status,welcome_email_sent
-d290f1ee-6c54-4b01-90e6-d701748f0851,test1@example.com,discord_user1,telegram_user1,Pet Collector,,Instagram,,"{Casual mobile games,PC Cozy games}",2024-03-10 12:00:00,pending,false
-e290f1ee-6c54-4b01-90e6-d701748f0852,test2@example.com,discord_user2,telegram_user2,Cozy Observer,,TikTok,,"{Collections / Gacha Games,PC Role Playing Games}",2024-03-10 12:01:00,pending,false
-f290f1ee-6c54-4b01-90e6-d701748f0853,test3@example.com,discord_user3,telegram_user3,Tap To Connect,,X,,"{Competitive Mobile Games,PC Competitive games}",2024-03-10 12:02:00,pending,false
-g290f1ee-6c54-4b01-90e6-d701748f0854,test4@example.com,discord_user4,telegram_user4,Other,Custom Playstyle,Other,Friend Recommendation,"{Web3 Games,Aesthetical Games}",2024-03-10 12:03:00,pending,false
-h290f1ee-6c54-4b01-90e6-d701748f0855,test5@example.com,discord_user5,telegram_user5,Pet Collector,,Word of Mouth,,"{Casual mobile games,I don't play games}",2024-03-10 12:04:00,pending,false 
