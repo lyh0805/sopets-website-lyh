@@ -1,0 +1,475 @@
+'use client';
+
+import React, { useEffect, useRef, useState } from 'react';
+import { SpinePlayer } from '@esotericsoftware/spine-player';
+import '@esotericsoftware/spine-player/dist/spine-player.css';
+import { motion, AnimatePresence } from 'framer-motion';
+import dynamic from 'next/dynamic';
+import Image from 'next/image';
+
+// Dynamically import Confetti with preload
+const Confetti = dynamic(() => import('react-confetti'), { 
+  ssr: false,
+  loading: () => null 
+});
+
+const SPINE_ASSETS = {
+  json: '/new_hatch/Egg_01.json',
+  atlas: '/new_hatch/Egg_01.atlas'
+};
+
+// Reduce the number of preloaded pets for mobile
+// const PET_IMAGES = Array.from({ length: 14 }, (_, i) => `/pets/pet_${i}.png`);
+const PET_IMAGES = [
+  '/pets/Pawling.png',
+  '/pets/Scoops.png', 
+  '/pets/Scaley.png',
+  '/pets/Camo.png',
+  '/pets/Cosmo.png',
+  '/pets/Snug.png',
+  '/pets/Beat.png']
+
+// Add debounce utility
+const debounce = <T extends (...args: any[]) => any>(func: T, wait: number) => {
+  let timeout: NodeJS.Timeout;
+  return function executedFunction(...args: Parameters<T>) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+};
+
+// Preload only necessary assets based on device
+const preloadSpineAssets = async () => {
+  try {
+    const [jsonResponse, atlasResponse] = await Promise.all([
+      fetch(SPINE_ASSETS.json),
+      fetch(SPINE_ASSETS.atlas)
+    ]);
+
+    if (!jsonResponse.ok || !atlasResponse.ok) {
+      throw new Error('Failed to load spine assets');
+    }
+
+    return await Promise.all([
+      jsonResponse.json(),
+      atlasResponse.text()
+    ]);
+  } catch (error) {
+    console.error('Error preloading spine assets:', error);
+    throw error;
+  }
+};
+
+// Optimize pet image preloading
+const preloadPetImages = async (isMobile: boolean) => {
+  const imagesToLoad = isMobile ? PET_IMAGES.slice(0, 5) : PET_IMAGES;
+  const loadedImages: string[] = [];
+
+  for (const src of imagesToLoad) {
+    try {
+      await new Promise<string>((resolve, reject) => {
+        const img = new window.Image();
+        img.onload = () => {
+          loadedImages.push(src);
+          resolve(src);
+        };
+        img.onerror = reject;
+        img.src = src;
+      });
+    } catch (error) {
+      console.error(`Failed to load image: ${src}`, error);
+    }
+  }
+
+  return loadedImages;
+};
+
+const ANIMATIONS = {
+  IDLE: '01_idling',
+  BARK: '02_bark',
+  ROTATE: '03_rotate_left_right',
+  SWING_LEFT: '04_swing_left',
+  SWING_RIGHT: '05_swing_right',
+  SWING_LEFT2: '06_swing_left2',
+  REVEAL: '07_reveal',
+  IDLE_CRACK1: '01_idling_crack1',
+  IDLE_CRACK3: '01_idling_crack3',
+  IDLE_CRACK4: '01_idling_crack4'
+};
+
+const IDLE_TIMEOUT = 6000; // 6 seconds
+
+const TestEggHatch = () => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const playerRef = useRef<SpinePlayer | null>(null);
+  const [tapCount, setTapCount] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const idleTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const isAnimatingRef = useRef(false);
+  const hasStartedInteractionRef = useRef(false);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [isComplete, setIsComplete] = useState(false);
+  const [randomPet, setRandomPet] = useState<string | null>(null);
+  const [assetsPreloaded, setAssetsPreloaded] = useState(false);
+  const [loadingProgress, setLoadingProgress] = useState(0);
+  const preloadedPets = useRef<string[]>([]);
+  const [windowSize, setWindowSize] = useState({
+    width: typeof window !== 'undefined' ? window.innerWidth : 0,
+    height: typeof window !== 'undefined' ? window.innerHeight : 0,
+  });
+  const [isMobile, setIsMobile] = useState(false);
+  const touchStartTime = useRef<number>(0);
+  const lastTapTime = useRef<number>(0);
+
+  // Handle window resize for confetti
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowSize({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Detect mobile device
+  useEffect(() => {
+    setIsMobile(window.innerWidth < 768);
+    
+    const handleResize = debounce(() => {
+      setIsMobile(window.innerWidth < 768);
+    }, 250);
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Modified preload assets
+  useEffect(() => {
+    const preloadAssets = async () => {
+      try {
+        setLoadingProgress(10);
+        await preloadSpineAssets();
+        setLoadingProgress(50);
+        
+        const loadedPets = await preloadPetImages(isMobile);
+        preloadedPets.current = loadedPets;
+        setLoadingProgress(90);
+        
+        setAssetsPreloaded(true);
+        setLoadingProgress(100);
+      } catch (error) {
+        console.error('Error during preload:', error);
+        setError('Failed to load assets');
+      }
+    };
+
+    preloadAssets();
+  }, [isMobile]);
+
+  // Initialize Spine player with mobile optimizations
+  useEffect(() => {
+    if (!assetsPreloaded || !containerRef.current) return;
+
+    try {
+      const player = new SpinePlayer(containerRef.current, {
+        jsonUrl: SPINE_ASSETS.json,
+        atlasUrl: SPINE_ASSETS.atlas,
+        animation: ANIMATIONS.IDLE,
+        alpha: true,
+        backgroundColor: '#00000000',
+        preserveDrawingBuffer: false,
+        showControls: false,
+        premultipliedAlpha: true,
+        viewport: {
+          padLeft: "0%",
+          padRight: "0%",
+          padTop: "0%",
+          padBottom: "0%",
+          x: -800,
+          y: -800,
+          width: 4000,
+          height: 4000
+        },
+        success: () => {
+          setIsLoading(false);
+          startIdleTimer();
+          
+          if (player.skeleton) {
+            const scale = isMobile ? 2.1 : 1.35;
+            player.skeleton.scaleX = scale;
+            player.skeleton.scaleY = scale;
+            
+            const containerWidth = containerRef.current!.clientWidth;
+            const containerHeight = containerRef.current!.clientHeight;
+            
+            const xOffset = isMobile ? 950 : 900;
+            const yOffset = isMobile ? 100 : 3750;
+            
+            player.skeleton.x = (containerWidth / 2) + xOffset;
+            player.skeleton.y = (containerHeight / 2) + yOffset;
+          }
+        },
+      });
+
+      playerRef.current = player;
+
+      return () => {
+        if (idleTimerRef.current) {
+          clearTimeout(idleTimerRef.current);
+        }
+        player.dispose();
+      };
+    } catch (err) {
+      console.error('Error initializing spine player:', err);
+      setError('Failed to initialize animation');
+      setIsLoading(false);
+    }
+  }, [assetsPreloaded, isMobile]);
+
+  // Function to play animation and return to idle state
+  const playAnimationSequence = async (
+    animation: string,
+    returnToAnimation: string = ANIMATIONS.IDLE,
+    loop: boolean = false
+  ) => {
+    if (!playerRef.current?.animationState || isAnimatingRef.current) return;
+    
+    isAnimatingRef.current = true;
+    const animState = playerRef.current.animationState;
+
+    try {
+      animState.clearTracks();
+      const trackEntry = animState.setAnimation(0, animation, loop);
+      
+      if (!loop) {
+        await new Promise<void>((resolve) => {
+          const listener = {
+            complete: () => {
+              if (returnToAnimation) {
+                animState.setAnimation(0, returnToAnimation, true);
+              }
+              animState.removeListener(listener);
+              resolve();
+            }
+          };
+          animState.addListener(listener);
+        });
+      }
+    } catch (err) {
+      console.error('Animation error:', err);
+      setError('Failed to play animation');
+    } finally {
+      isAnimatingRef.current = false;
+    }
+  };
+
+  // Handle idle timeout
+  const startIdleTimer = () => {
+    if (idleTimerRef.current) {
+      clearTimeout(idleTimerRef.current);
+    }
+    
+    if (!hasStartedInteractionRef.current) {
+      idleTimerRef.current = setTimeout(() => {
+        if (!isAnimatingRef.current) {
+          playAnimationSequence(ANIMATIONS.BARK, ANIMATIONS.IDLE).then(() => {
+            if (!hasStartedInteractionRef.current) {
+              startIdleTimer();
+            }
+          });
+        }
+      }, IDLE_TIMEOUT);
+    }
+  };
+
+  // Generate random pet from preloaded images
+  const generateRandomPet = () => {
+    if (preloadedPets.current.length === 0) return PET_IMAGES[0];
+    const randomIndex = Math.floor(Math.random() * preloadedPets.current.length);
+    return preloadedPets.current[randomIndex];
+  };
+
+  // Handle completion
+  const handleCompletion = () => {
+    setIsComplete(true);
+    setShowConfetti(true);
+    setRandomPet(generateRandomPet());
+    setTimeout(() => setShowConfetti(false), 5000);
+  };
+
+  // Simplified tap handler for mobile
+  const handleTap = async () => {
+    if (isAnimatingRef.current || isComplete) return;
+    
+    if (!hasStartedInteractionRef.current) {
+      hasStartedInteractionRef.current = true;
+      if (idleTimerRef.current) {
+        clearTimeout(idleTimerRef.current);
+        idleTimerRef.current = null;
+      }
+    }
+    
+    const newTapCount = tapCount + 1;
+    setTapCount(newTapCount);
+
+    try {
+      switch (newTapCount) {
+        case 1:
+          await playAnimationSequence(ANIMATIONS.ROTATE, ANIMATIONS.IDLE);
+          break;
+        case 2:
+          await playAnimationSequence(ANIMATIONS.SWING_LEFT, ANIMATIONS.IDLE_CRACK1);
+          break;
+        case 3:
+          await playAnimationSequence(ANIMATIONS.SWING_RIGHT, ANIMATIONS.IDLE_CRACK3);
+          break;
+        case 4:
+          await playAnimationSequence(ANIMATIONS.SWING_LEFT2, ANIMATIONS.IDLE_CRACK4);
+          setTimeout(() => {
+            playAnimationSequence(ANIMATIONS.REVEAL, '', false).then(handleCompletion);
+          }, 1000);
+          break;
+      }
+    } catch (error) {
+      console.error('Animation error:', error);
+      setError('Failed to play animation');
+    }
+  };
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center space-y-4 p-8 bg-red-500/10 rounded-lg">
+        <p className="text-red-500">Something went wrong. Please try again.</p>
+        <button 
+          onClick={() => window.location.reload()}
+          className="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="relative w-full min-h-[50vh] md:min-h-screen flex flex-col items-center justify-center">
+      <div className="absolute inset-0 bg-gradient-to-b from-purple-900/20 via-black to-black" />
+      
+      {/* Loading overlay */}
+      {!assetsPreloaded && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 z-50">
+          <div className="w-64 h-1 bg-white/10 rounded-full overflow-hidden">
+            <motion.div 
+              className="h-full bg-gradient-to-r from-purple-500 to-pink-500"
+              initial={{ width: 0 }}
+              animate={{ width: `${loadingProgress}%` }}
+              transition={{ duration: 0.3 }}
+            />
+          </div>
+        </div>
+      )}
+      
+      <div className="relative w-full max-w-7xl mx-auto flex items-center justify-center">
+        <AnimatePresence mode="wait">
+          {!isComplete ? (
+            <div 
+              className="relative flex items-center justify-center" 
+              style={{ 
+                width: isMobile ? '1000px' : '1600px', 
+                height: isMobile ? '1000px' : '1600px',
+                overflow: 'visible'
+              }}
+            >
+              <div 
+                ref={containerRef}
+                onClick={handleTap}
+                onTouchStart={(e) => {
+                  e.preventDefault();
+                  handleTap();
+                }}
+                className="absolute cursor-pointer"
+                style={{ 
+                  width: '100%',
+                  height: '100%',
+                  opacity: isLoading ? 0.5 : 1,
+                  transition: 'opacity 0.3s ease-in-out',
+                  transform: `scale(${isMobile ? 1.1 : 1.2})`,
+                  transformOrigin: 'center center',
+                  overflow: 'visible'
+                }}
+              />
+              
+              {isLoading && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-8 w-8 md:h-12 md:w-12 border-b-2 border-purple-500" />
+                </div>
+              )}
+            </div>
+          ) : (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              className="flex flex-col items-center justify-center text-center px-4"
+            >
+              {showConfetti && !isMobile && (
+                <Confetti
+                  width={windowSize.width}
+                  height={windowSize.height}
+                  recycle={false}
+                  numberOfPieces={isMobile ? 100 : 200}
+                  gravity={0.3}
+                  tweenDuration={4000}
+                />
+              )}
+              
+              {/* Pet reveal - Keep original size */}
+              {/* Pet reveal - Wrapped for translation */}
+              {randomPet && (
+                <div style={{ transform: 'translate(-20px, -200px)' }}>
+                  <motion.div
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1.1, opacity: 1 }}
+                    className="relative w-64 h-64 md:w-96 md:h-80 mb-8"
+                  >
+                    <Image
+                      src={randomPet}
+                      alt="Your new SoPet"
+                      fill
+                      className="object-contain"
+                      priority
+                    />
+                  </motion.div>
+                </div>
+              )}
+              
+              {/* Retry button */}
+              <motion.button
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ 
+                  opacity: 1, 
+                  y: -420 }}
+                transition={{ delay: 0.3 }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => window.open('https://discord.gg/V3YneV4Wzs', '_blank')}
+                className="px-6 py-3 md:px-8 md:py-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:opacity-90 transition-all shadow-lg hover:shadow-xl text-sm md:text-base"
+              >
+                Claim Your Egg Now!
+              </motion.button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </div>
+  );
+};
+
+export default TestEggHatch; 

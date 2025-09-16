@@ -1,0 +1,8 @@
+.next
+node_modules
+.env
+.env.local
+.env.*.local
+.env.production
+
+node_modules/@next/swc-darwin-arm64/next-swc.darwin-arm64.node
