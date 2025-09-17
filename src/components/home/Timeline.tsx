@@ -7,7 +7,7 @@ const phases = [
   {
     id: 1,
     date: "Now",
-    title: "SoPets Desktop Open Beta V1 ",
+    title: "SoPets Desktop Closed Beta",
     badge: "Live",
     color: "bg-green-500",
     summary: "Discord-members-only desktop build",
@@ -22,7 +22,7 @@ const phases = [
   {
     id: 2,
     date: "Late Sep 2025",
-    title: "SoPets Desktop Open Beta V2",
+    title: "SoPets Desktop Open Beta",
     badge: "Incoming",
     color: "bg-amber-500",
     summary: "Hatch your first SoPet egg on desktop, experience our new animations, and a more polished experience.",
@@ -36,7 +36,7 @@ const phases = [
   {
     id: 3,
     date: "Late Sep 2025",
-    title: "SoPets Mobile Closed Beta v1",
+    title: "SoPets Mobile Closed Beta",
     badge: "In Prep",
     color: "bg-blue-500",
     summary: "Invite-only closed beta for mobile.",
@@ -49,7 +49,7 @@ const phases = [
   {
     id: 4,
     date: "Late Oct 2025",
-    title: "SoPets Mobile Open Beta V1",
+    title: "SoPets Mobile Open Beta",
     badge: "Target",
     color: "bg-purple-500",
     summary: "Public sign-ups for mobile. Tap phones together to breed, share, and collect different variants and mix & matches with friends.",
@@ -106,7 +106,7 @@ export default function Timeline() {
             The Journey of SoPets
           </h2>
           <p className="text-gray-300 max-w-2xl mx-auto text-lg">
-            Built around <strong>physical Tap-to-Connect</strong>. Dates and scope may shift as we polish the experience.
+            Built around <strong>Desktop Companionship and Tap-to-Collect</strong>. Dates and scope may shift as we polish the experience.
           </p>
         </motion.div>
 

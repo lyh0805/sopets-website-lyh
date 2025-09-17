@@ -125,7 +125,7 @@ const Hero = () => {
           </div>
           
           <p ref={textRef} className="mb-8 text-xl text-gray-300 md:text-2xl">
-          A cozy companion game where your pets live, grow, and roam across devices. Tap with friends. Hatch rare breeds. Watch your pets come to life.
+          Cozy companions that Live, Grow, and Roam across devices. Tap with friends and Hatch rare breeds. 
 
           </p>
 
@@ -141,11 +141,11 @@ const Hero = () => {
             onClick={() => window.open('https://discord.com/invite/V3YneV4Wzs', '_blank')}
           >
             <span className="flex items-center justify-center">
-              Download Beta Version
+              Gain Beta Access
             </span>
           </motion.button>
           <p className="mt-2 text-sm text-gray-400 pl-2">
-            * Gain Access to The Download Link by Following our Discord Server Guide!
+            * Claim your limited-time FREE egg and Gain Access to The Download Link by Joining and Following our Discord Server Guide!
           </p>
         </div>
       </div>

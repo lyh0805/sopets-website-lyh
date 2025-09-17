@@ -36,7 +36,7 @@ const socialLinks = [
   },
   {
     name: 'Instagram',
-    href: 'https://www.instagram.com/sopets_nft/',
+    href: 'https://www.instagram.com/sopets_official_/',
     icon: (props: React.SVGProps<SVGSVGElement>) => (
       <svg fill="currentColor" viewBox="0 0 24 24" {...props}>
         <path
@@ -237,7 +237,7 @@ const Header = () => {
               }}
               className="self-start rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 px-6 py-3 text-base font-semibold text-white transition-all duration-300"
             >
-              Download Beta Now!
+              Join Closed Beta Now!
             </motion.button>
             
             {/* Mobile Social Links - Made Bigger */}

@@ -3,8 +3,8 @@ import React from 'react';
 import { motion } from 'framer-motion';
 
 export default function FeatureGallery() {
-  // Replace this with your actual YouTube video ID
-  const YOUTUBE_VIDEO_ID = "9PiNTBPI2-U"; // Example ID - replace with your video ID
+  // Replace this with the up to date YouTube video ID
+  const YOUTUBE_VIDEO_ID = "HGfT8zqZWxg"; 
   
   return (
     <section className="relative py-24 overflow-hidden">

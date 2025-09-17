@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 
@@ -23,6 +23,28 @@ const LoreSnippetCard: React.FC<LoreSnippetCardProps> = ({
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [showContent, setShowContent] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detect if device is mobile/touch device
+  useEffect(() => {
+    const checkMobile = () => {
+      const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      const isSmallScreen = window.innerWidth <= 768;
+      setIsMobile(isTouchDevice || isSmallScreen);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Handle mobile tap to toggle content
+  const handleMobileClick = () => {
+    if (isMobile) {
+      setShowContent(!showContent);
+    }
+  };
 
   const colorThemes = {
     purple: {
@@ -71,6 +93,9 @@ const LoreSnippetCard: React.FC<LoreSnippetCardProps> = ({
 
   const theme = colorThemes[accentColor];
 
+  // Determine if we should show content based on device type
+  const shouldShowContent = isMobile ? showContent : isHovered;
+
   const renderMedia = () => {
     if (!mediaSrc) return null;
 
@@ -79,7 +104,7 @@ const LoreSnippetCard: React.FC<LoreSnippetCardProps> = ({
         <div 
           className={`
             absolute inset-0 z-10 transition-opacity duration-500
-            ${isHovered ? 'opacity-20' : 'opacity-100'}
+            ${shouldShowContent ? 'opacity-20' : 'opacity-100'}
           `}
         >
           <video
@@ -101,7 +126,7 @@ const LoreSnippetCard: React.FC<LoreSnippetCardProps> = ({
         <div 
           className={`
             absolute inset-0 z-10 transition-opacity duration-500
-            ${isHovered ? 'opacity-20' : 'opacity-100'}
+            ${shouldShowContent ? 'opacity-20' : 'opacity-100'}
           `}
         >
           <Image
@@ -138,14 +163,16 @@ const LoreSnippetCard: React.FC<LoreSnippetCardProps> = ({
       <motion.div
         className={`
           relative rounded-3xl overflow-hidden cursor-pointer
-          border ${isHovered ? theme.hoverBorder : theme.border}
+          border ${(isHovered && !isMobile) || (isMobile && showContent) ? theme.hoverBorder : theme.border}
           transition-all duration-300
-          ${isHovered ? `shadow-2xl ${theme.glowColor}` : 'shadow-lg'}
+          ${(isHovered && !isMobile) || (isMobile && showContent) ? `shadow-2xl ${theme.glowColor}` : 'shadow-lg'}
           min-h-[500px] w-full
         `}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-        whileHover={{ scale: 1.02 }}
+        onMouseEnter={() => !isMobile && setIsHovered(true)}
+        onMouseLeave={() => !isMobile && setIsHovered(false)}
+        onClick={handleMobileClick}
+        whileHover={!isMobile ? { scale: 1.02 } : {}}
+        whileTap={{ scale: 0.98 }}
         transition={{ duration: 0.3 }}
         initial={{ opacity: 0, scale: 0.95 }}
         whileInView={{ opacity: 1, scale: 1 }}
@@ -166,10 +193,22 @@ const LoreSnippetCard: React.FC<LoreSnippetCardProps> = ({
           </div>
         )}
 
+        {/* Mobile tap indicator */}
+        {isMobile && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: showContent ? 0 : 0.8 }}
+            transition={{ duration: 0.3 }}
+            className="absolute bottom-4 right-4 z-30 bg-black/60 backdrop-blur-sm px-3 py-2 rounded-lg text-white/80 text-sm"
+          >
+            Tap to {showContent ? 'show media' : 'read story'}
+          </motion.div>
+        )}
+
         {/* Content Container */}
         <div className="relative z-20 h-full min-h-[500px]">
           <AnimatePresence mode="wait">
-            {!isHovered ? (
+            {!shouldShowContent ? (
               // Default state: Show media with minimal overlay
               <motion.div
                 key="default"
@@ -189,14 +228,14 @@ const LoreSnippetCard: React.FC<LoreSnippetCardProps> = ({
                     }}
                     className="text-white/80 text-lg font-medium bg-black/40 px-6 py-3 rounded-lg backdrop-blur-sm"
                   >
-                    Hover to reveal the story
+                    {isMobile ? 'Tap to reveal the story' : 'Hover to reveal the story'}
                   </motion.div>
                 </div>
               </motion.div>
             ) : (
-              // Hovered state: Show content with full background
+              // Hovered/Tapped state: Show content with full background
               <motion.div
-                key="hovered"
+                key="content"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -204,9 +243,31 @@ const LoreSnippetCard: React.FC<LoreSnippetCardProps> = ({
                 className="h-full p-8 bg-black/90 backdrop-blur-sm"
               >
                 {/* Content background */}
-                <div className={`h-full rounded-2xl bg-gradient-to-br ${theme.gradient} p-8 overflow-y-auto`}>
+                <div className={`h-full rounded-2xl bg-gradient-to-br ${theme.gradient} p-8 overflow-y-auto relative`}>
+                  {/* Mobile back button */}
+                  {isMobile && (
+                    <motion.button
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: 0.2 }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowContent(false);
+                      }}
+                      className="absolute top-4 right-4 z-10 bg-black/60 backdrop-blur-sm text-white/80 px-3 py-2 rounded-lg text-sm hover:bg-black/80 transition-colors"
+                    >
+                      ✕ Close
+                    </motion.button>
+                  )}
+                  
                   <div className="prose prose-2xl prose-invert max-w-none text-center">
-                    {content}
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.1 }}
+                    >
+                      {content}
+                    </motion.div>
                   </div>
                 </div>
               </motion.div>

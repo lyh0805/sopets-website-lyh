@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface PetLoreContainerProps {
@@ -28,6 +28,28 @@ const PetLoreContainer: React.FC<PetLoreContainerProps> = ({
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isClicked, setIsClicked] = useState(false);
+  const [showDescription, setShowDescription] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detect if device is mobile/touch device
+  useEffect(() => {
+    const checkMobile = () => {
+      const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      const isSmallScreen = window.innerWidth <= 768;
+      setIsMobile(isTouchDevice || isSmallScreen);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Handle mobile tap to toggle description
+  const handleMobileClick = () => {
+    if (isMobile) {
+      setShowDescription(!showDescription);
+    }
+  };
 
   // Enhanced color theme configurations
   const colorThemes = {
@@ -85,23 +107,29 @@ const PetLoreContainer: React.FC<PetLoreContainerProps> = ({
   const theme = colorThemes[accentColor];
   const sizeClasses = imageSizes[imageSize];
 
+  // Determine if we should show description based on device type
+  const shouldShowDescription = isMobile ? showDescription : isHovered;
+
   return (
     <motion.div
       className={`
         relative w-80 h-96 bg-gradient-to-b ${theme.gradient} rounded-lg 
-        border ${isHovered ? theme.hoverBorder : theme.border} 
+        border ${(isHovered && !isMobile) || (isMobile && showDescription) ? theme.hoverBorder : theme.border} 
         p-6 cursor-pointer overflow-hidden transition-all duration-300
-        ${isHovered ? `shadow-2xl ${theme.glowColor}` : 'shadow-lg'}
+        ${(isHovered && !isMobile) || (isMobile && showDescription) ? `shadow-2xl ${theme.glowColor}` : 'shadow-lg'}
       `}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      onMouseEnter={() => !isMobile && setIsHovered(true)}
+      onMouseLeave={() => !isMobile && setIsHovered(false)}
       onTapStart={() => setIsClicked(true)}
-      onTap={() => setTimeout(() => setIsClicked(false), 150)}
-      whileHover={{ 
+      onTap={() => {
+        setTimeout(() => setIsClicked(false), 150);
+        handleMobileClick();
+      }}
+      whileHover={!isMobile ? { 
         scale: 1.02,
         rotateY: 2,
         z: 10
-      }}
+      } : {}}
       whileTap={{ scale: 0.98 }}
       transition={{ duration: 0.3 }}
     >
@@ -110,7 +138,7 @@ const PetLoreContainer: React.FC<PetLoreContainerProps> = ({
         className={`
           absolute inset-0 rounded-lg opacity-0 transition-opacity duration-300 
           bg-gradient-to-r ${theme.rarityGradient} p-[1px]
-          ${isHovered ? 'opacity-100' : ''}
+          ${(isHovered && !isMobile) || (isMobile && showDescription) ? 'opacity-100' : ''}
         `}
       >
         <div className="w-full h-full bg-black/90 rounded-lg" />
@@ -132,15 +160,26 @@ const PetLoreContainer: React.FC<PetLoreContainerProps> = ({
         {rarity}
       </motion.div>
 
-      {/* Shimmer Effect on Hover */}
+      {/* Mobile tap indicator */}
+      {isMobile && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: showDescription ? 0 : 0.6 }}
+          className="absolute bottom-3 left-3 z-30 text-white/60 text-xs"
+        >
+          Tap to {showDescription ? 'show video' : 'read more'}
+        </motion.div>
+      )}
+
+      {/* Shimmer Effect on Hover/Touch */}
       <div className={`
         absolute inset-0 -translate-x-full transition-transform duration-1000 z-20
         bg-gradient-to-r ${theme.shimmer}
-        ${isHovered ? 'translate-x-full' : ''}
+        ${shouldShowDescription ? 'translate-x-full' : ''}
       `} />
       
       <AnimatePresence mode="wait">
-        {!isHovered ? (
+        {!shouldShowDescription ? (
           // Default state: Show image with title and subtitle
           <motion.div
             key="default"
@@ -153,7 +192,7 @@ const PetLoreContainer: React.FC<PetLoreContainerProps> = ({
             {/* Image with custom sizing and translation */}
             <div className="flex-1 relative mb-4 flex items-center justify-center">
               {/* Floating Particles on Hover */}
-              {isHovered && (
+              {shouldShowDescription && (
                 <div className="absolute inset-0 pointer-events-none">
                   {[...Array(5)].map((_, i) => (
                     <motion.div
@@ -191,7 +230,7 @@ const PetLoreContainer: React.FC<PetLoreContainerProps> = ({
                 style={{
                   transform: `translate(${imageTranslate.x}px, ${imageTranslate.y}px)`
                 }}
-                whileHover={{ scale: 1.05 }}
+                whileHover={!isMobile ? { scale: 1.05 } : {}}
                 transition={{ duration: 0.3 }}
               />
             </div>
@@ -205,7 +244,7 @@ const PetLoreContainer: React.FC<PetLoreContainerProps> = ({
                     transform: `translate(${titleTranslate.x}px, ${titleTranslate.y}px)`
                   } : undefined
                 }
-                whileHover={{ scale: 1.05 }}
+                whileHover={!isMobile ? { scale: 1.05 } : {}}
               >
                 {petName}
               </motion.h3>
@@ -222,9 +261,9 @@ const PetLoreContainer: React.FC<PetLoreContainerProps> = ({
             </div>
           </motion.div>
         ) : (
-          // Hovered state: Show description with enhanced animations
+          // Hovered/Tapped state: Show description with enhanced animations
           <motion.div
-            key="hovered"
+            key="description"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
@@ -281,6 +320,21 @@ const PetLoreContainer: React.FC<PetLoreContainerProps> = ({
               >
                 Learn More
               </motion.button>
+              
+              {/* Mobile-specific back button */}
+              {isMobile && (
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowDescription(false);
+                  }}
+                  className="px-3 py-1 text-xs rounded-full border transition-colors bg-gray-500/20 text-gray-300 border-gray-500/30 hover:bg-gray-500/30"
+                >
+                  Back
+                </motion.button>
+              )}
             </motion.div>
           </motion.div>
         )}

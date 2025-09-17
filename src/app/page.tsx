@@ -26,20 +26,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Section 2: Vision - Purple with enhanced particles */}
-      <div className="relative bg-gradient-to-b from-purple-900/20 via-purple-900/20 to-purple-900/20 overflow-hidden">
-        <FloatingParticles 
-          count={25} 
-          color="rgba(168, 85, 247, 0.4)"
-          maxSize={5}
-          minSize={2}
-        />
-        <div className="relative z-10">
-          <Vision />
-        </div>
-      </div>
-
-      {/* Section 3: Desktop Features - Black with glass effects */}
+      {/* Section 2: Desktop Features - Black with glass effects */}
       <div className="relative bg-black overflow-hidden">
         <FloatingParticles 
           count={12} 
@@ -53,6 +40,23 @@ export default function Home() {
         </div>
         <div className="relative z-10">
           <DesktopShowcaseYouTube />
+        </div>
+      </div>
+
+      {/* Section 3: Hatching Preview - Black with interactive elements */}
+      <div className="relative bg-black overflow-hidden">
+        <FloatingParticles 
+          count={20} 
+          color="rgba(147, 51, 234, 0.25)"
+          maxSize={3}
+          minSize={1}
+        />
+        {/* Ambient glow effects */}
+        <div className="absolute inset-0 opacity-20">
+          <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-96 h-96 bg-purple-600 rounded-full blur-3xl" />
+        </div>
+        <div className="relative z-10">
+          <HatchingPreview />
         </div>
       </div>
 
@@ -74,27 +78,7 @@ export default function Home() {
         </div>
       </div>
 
-
-
-      {/* Section 5: Hatching Preview - Black with interactive elements */}
-      <div className="relative bg-black overflow-hidden">
-        <FloatingParticles 
-          count={20} 
-          color="rgba(147, 51, 234, 0.25)"
-          maxSize={3}
-          minSize={1}
-        />
-        {/* Ambient glow effects */}
-        <div className="absolute inset-0 opacity-20">
-          <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-96 h-96 bg-purple-600 rounded-full blur-3xl" />
-        </div>
-        <div className="relative z-10">
-          <HatchingPreview />
-        </div>
-      </div>
-
-
-      {/* Section 6: Timeline - Purple with enhanced visual hierarchy */}
+      {/* Section 5: Timeline - Purple with enhanced visual hierarchy */}
       <div className="relative bg-gradient-to-b from-purple-900/20 via-purple-900/20 to-purple-900/20 overflow-hidden">
         <FloatingParticles 
           count={35} 
@@ -112,6 +96,21 @@ export default function Home() {
           <Timeline />
         </div>
       </div>
+
+      {/* Section 6: Vision - Purple with enhanced particles */}
+      <div className="relative bg-gradient-to-b from-purple-900/20 via-purple-900/20 to-purple-900/20 overflow-hidden">
+        <FloatingParticles 
+          count={25} 
+          color="rgba(168, 85, 247, 0.4)"
+          maxSize={5}
+          minSize={2}
+        />
+        <div className="relative z-10">
+          <Vision />
+        </div>
+      </div>
+
+
 
       {/* Section 7: Latest Developments - Black with final flourish */}
       <div className="relative bg-black overflow-hidden">
