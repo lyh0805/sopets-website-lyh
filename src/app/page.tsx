@@ -2,8 +2,8 @@
 import React from 'react';
 import Hero from '@/components/home/Hero';
 import Vision from '@/components/home/Vision';
-import DesktopShowcaseYouTube from '@/components/home/DesktopShowcaseYoutube';
-import MobileFeatureGallery from '@/components/home/MobileFeatureGallery';
+import DesktopShowcase from '@/components/home/DesktopShowcase';
+import MobileShowcase from '@/components/home/MobileShowcase';
 import LatestDevelopments from '@/components/home/LatestDevelopments';
 import HatchingPreview from '@/components/home/HatchingPreview';
 import Timeline from '@/components/home/Timeline';
@@ -39,28 +39,11 @@ export default function Home() {
           <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 via-transparent to-pink-500/10" />
         </div>
         <div className="relative z-10">
-          <DesktopShowcaseYouTube />
+          <DesktopShowcase />
         </div>
       </div>
 
-      {/* Section 3: Hatching Preview - Black with interactive elements */}
-      <div className="relative bg-black overflow-hidden">
-        <FloatingParticles 
-          count={20} 
-          color="rgba(147, 51, 234, 0.25)"
-          maxSize={3}
-          minSize={1}
-        />
-        {/* Ambient glow effects */}
-        <div className="absolute inset-0 opacity-20">
-          <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-96 h-96 bg-purple-600 rounded-full blur-3xl" />
-        </div>
-        <div className="relative z-10">
-          <HatchingPreview />
-        </div>
-      </div>
-
-      {/* Section 4: Mobile Features - Purple with enhanced interactivity */}
+      {/* Section 3: Mobile Features - Purple with enhanced interactivity */}
       <div className="relative bg-gradient-to-b from-purple-900/20 via-purple-900/20 to-purple-900/20 overflow-hidden">
         <FloatingParticles 
           count={30} 
@@ -74,7 +57,24 @@ export default function Home() {
           <div className="absolute bottom-1/4 right-1/4 w-48 h-48 bg-pink-500 rounded-full blur-3xl" />
         </div>
         <div className="relative z-10">
-          <MobileFeatureGallery />
+          <MobileShowcase />
+        </div>
+      </div>
+
+      {/* Section 4: Hatching Preview - Black with interactive elements */}
+      <div className="relative bg-black overflow-hidden">
+        <FloatingParticles 
+          count={20} 
+          color="rgba(147, 51, 234, 0.25)"
+          maxSize={3}
+          minSize={1}
+        />
+        {/* Ambient glow effects */}
+        <div className="absolute inset-0 opacity-20">
+          <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-96 h-96 bg-purple-600 rounded-full blur-3xl" />
+        </div>
+        <div className="relative z-10">
+          <HatchingPreview />
         </div>
       </div>
 

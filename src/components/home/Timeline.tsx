@@ -7,29 +7,29 @@ const phases = [
   {
     id: 1,
     date: "Now",
-    title: "SoPets Desktop Closed Beta",
+    title: "SoPets Desktop Open Beta V1",
     badge: "Live",
     color: "bg-green-500",
-    summary: "Discord-members-only desktop build",
+    summary: "✨ Start your cozy adventure on desktop today.",
     points: [
-      "Free random starter SoPet for all new players",
-      "Pet and Feed your SoPet",
-      "Designed with non-distractive companionship in mind"
+      "Adopt your free random starter SoPet",
+      "Pet, feed, and share gentle moments together",
+      "Designed for calm, non-distracting companionship"
     ],
-    cta: { label: "Get Access in Discord", href: "https://discord.com/invite/V3YneV4Wzs" },
-    helper: "Navigate to Server Guide → #beta-access"
+    cta: { label: "Join our community!", href: "https://discord.com/invite/V3YneV4Wzs" },
+    helper: "Come and and interact with other SoPets players from all around the world!"
   },
   {
     id: 2,
     date: "Late Sep 2025",
-    title: "SoPets Desktop Open Beta",
+    title: "SoPets Desktop Open Beta V2",
     badge: "Incoming",
     color: "bg-amber-500",
-    summary: "Hatch your first SoPet egg on desktop, experience our new animations, and a more polished experience.",
+    summary: "Your SoPets world gets a little livelier.",
     points: [
-      "Hatch a SoPet egg on desktop",
-      "New idle, chilling, and interaction animations",
-      "Access different pets from your collection",
+      "Hatch your first SoPet egg on desktop",
+      "Enjoy new idle and playful animations",
+      "Switch between different pets in your collection",
     ],
     cta: { label: "Coming Soon" }
   },
@@ -39,10 +39,10 @@ const phases = [
     title: "SoPets Mobile Closed Beta",
     badge: "In Prep",
     color: "bg-blue-500",
-    summary: "Invite-only closed beta for mobile.",
+    summary: "A sneak peek on mobile.",
     points: [
-      "Tap To Collect with friends",
-      "Breed New Eggs",
+      "Tap to connect with friends and discover new SoPets",
+      "Breed eggs together for gentle surprises",
     ],
     cta: { label: "Coming soon" }
   },
@@ -52,38 +52,40 @@ const phases = [
     title: "SoPets Mobile Open Beta",
     badge: "Target",
     color: "bg-purple-500",
-    summary: "Public sign-ups for mobile. Tap phones together to breed, share, and collect different variants and mix & matches with friends.",
+    summary: "Bring SoPets anywhere.",
     points: [
-      "Tap To Collect with friends",
-      "Grow your island by collecting unique subvariants",
-      "Cross-platform login (Apple/Google)"
+      "Public sign-ups for all players",
+      "Tap phones with friends to collect, breed, and share SoPets",
+      "Grow your island with unique companions",
+      "Cross-platform login with Apple/Google"
     ],
     cta: { label: "Coming Soon" }
   },
   {
     id: 5,
     date: "Late December 2025",
-    title: "Cross-device Sync",
+    title: "Mobile Open Beta",
     badge: "Planned",
     color: "bg-slate-500",
-    summary: "Your SoPets lives across your desktop and mobile. Tap to collect SoPets on mobile, and enjoy companionship on desktop.",
+    summary: "Your SoPet, wherever you are.",
     points: [
-      "Seamless presence across devices",
+      "Seamless presence across desktop and mobile",
+      "Collect on mobile, relax with companionship on desktop"
     ],
     cta: { label: "Coming soon" }
   },
   {
     id: 6,
     date: "2026+",
-    title: "Official Launch - New Natures, Social Islands & Creator Program",
+    title: "Official Launch — A Growing Cozy World",
     badge: "Planned",
     color: "bg-slate-500",
-    summary: "A bigger world, deeper social play, and more content!",
+    summary: "The SoPets universe expands.",
     points: [
       "Multi-player island gatherings",
       "Seasonal events",
       "New pet natures and behaviors",
-      "Proximity-based interactions on Desktop"
+      "Nearby connections with friends on desktop"
     ],
     cta: { label: "Coming soon" }
   }
@@ -103,10 +105,10 @@ export default function Timeline() {
             Roadmap
           </span>
           <h2 className="mb-6 text-4xl font-extrabold text-white sm:text-5xl">
-            The Journey of SoPets
+          The SoPets Journey
           </h2>
           <p className="text-gray-300 max-w-2xl mx-auto text-lg">
-            Built around <strong>Desktop Companionship and Tap-to-Collect</strong>. Dates and scope may shift as we polish the experience.
+          We’re crafting SoPets with care — focusing on companionship and gentle ways to connect. The timeline may shift as we polish things to enable the best possible experience.
           </p>
         </motion.div>
 

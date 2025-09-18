@@ -65,7 +65,7 @@ const Hero = () => {
 
     // Content fade out on scroll
     gsap.to(content, {
-      yPercent: -20,
+      yPercent: -5,
       opacity: 0,
       scrollTrigger: {
         trigger: section,
@@ -124,10 +124,14 @@ const Hero = () => {
             />
           </div>
           
-          <p ref={textRef} className="mb-8 text-xl text-gray-300 md:text-2xl">
-          Cozy companions that Live, Grow, and Roam across devices. Tap with friends and Hatch rare breeds. 
-
-          </p>
+          <div ref={textRef} className="mb-8">
+            <h2 className="text-xl text-gray-300 md:text-2xl font-semibold mb-2">
+              A little friend for your screen 
+            </h2>
+            <p className="text-lg text-gray-400 md:text-xl">
+              SoPets are gentle digital pets that keep you company while you work, study, or relax. Like a cozy plant on your desk, your SoPet brings calm, warmth, and joy to your digital world.
+            </p>
+          </div>
 
           <form 
             ref={formRef}
@@ -141,11 +145,11 @@ const Hero = () => {
             onClick={() => window.open('https://discord.com/invite/V3YneV4Wzs', '_blank')}
           >
             <span className="flex items-center justify-center">
-              Gain Beta Access
+              Join Our Community!
             </span>
           </motion.button>
           <p className="mt-2 text-sm text-gray-400 pl-2">
-            * Claim your limited-time FREE egg and Gain Access to The Download Link by Joining and Following our Discord Server Guide!
+            * Claim rewards and interact with other players!
           </p>
         </div>
       </div>

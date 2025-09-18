@@ -65,10 +65,10 @@ const Vision = () => {
           {/* Left side - Content */}
           <div ref={contentRef} className="text-center lg:text-left">
             <h2 className="mb-6 text-4xl font-bold text-white lg:text-5xl">
-              Our Vision
+              Our Vision 🌿
             </h2>
             <p className="mb-8 text-xl leading-relaxed text-gray-300">
-            To create digital pets that truly feel alive — pets that coexist with you in your digital world. We built SoPets to exist on both desktop and mobile, so your little guy is always by your side, whether you're working, socializing, gaming, or just chilling.
+              We dream of digital pets that feel like true companions — always nearby to bring calm, comfort, and joy. Whether you’re studying, gaming, or relaxing, your SoPet is there to make your digital world feel a little warmer.
             </p>
             
           </div>
