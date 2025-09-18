@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import gsap from 'gsap';
@@ -18,6 +18,10 @@ const Hero = () => {
   const logoRef = useRef<HTMLDivElement>(null);
   const textRef = useRef<HTMLParagraphElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
+  const petRef = useRef<HTMLDivElement>(null);
+
+  const [isPetHovered, setIsPetHovered] = useState(false);
+  const [currentGif, setCurrentGif] = useState('dragon_naive-sleeping.gif');
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -26,8 +30,9 @@ const Hero = () => {
     const logo = logoRef.current;
     const text = textRef.current;
     const form = formRef.current;
+    const pet = petRef.current;
 
-    if (!section || !content || !bg || !logo || !text || !form) return;
+    if (!section || !content || !bg || !logo || !text || !form || !pet) return;
 
     // Initial animation timeline
     const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
@@ -50,6 +55,11 @@ const Hero = () => {
       { x: -20, opacity: 0 },
       { x: 0, opacity: 1, duration: 0.8 },
       "-=0.5"
+    )
+    .fromTo(pet,
+      { y: 50, opacity: 0 },
+      { y: 0, opacity: 1, duration: 1 },
+      "-=0.3"
     );
 
     // Parallax effect on scroll
@@ -75,6 +85,16 @@ const Hero = () => {
       }
     });
 
+    // Pet parallax effect - moves slightly with scroll
+    gsap.to(pet, {
+      yPercent: -10,
+      scrollTrigger: {
+        trigger: section,
+        start: "top top",
+        scrub: true
+      }
+    });
+
     // Mouse move effect for subtle background parallax
     const handleMouseMove = (e: MouseEvent) => {
       const { clientX, clientY } = e;
@@ -93,6 +113,17 @@ const Hero = () => {
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
+  // Handle pet hover states
+  const handlePetHover = () => {
+    setIsPetHovered(true);
+    setCurrentGif('dragon_naive-petting.gif');
+  };
+
+  const handlePetLeave = () => {
+    setIsPetHovered(false);
+    setCurrentGif('dragon_naive-idle.gif');
+  };
+
   return (
     <section ref={sectionRef} className="relative min-h-screen overflow-hidden pt-20">
       {/* Background Image */}
@@ -108,6 +139,28 @@ const Hero = () => {
         <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent" />
         {/* Bottom fade gradient */}
         <div className="absolute bottom-0 left-0 right-0 h-64 bg-gradient-to-b from-transparent via-black/80 to-black" />
+      </div>
+
+      {/* Interactive Pet */}
+      <div 
+        ref={petRef}
+        className="fixed bottom-8 left-8 z-20 cursor-pointer"
+        onMouseEnter={handlePetHover}
+        onMouseLeave={handlePetLeave}
+      >
+        <motion.div
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
+          className="relative w-24 h-24 md:w-32 md:h-32"
+        >
+          <Image
+            src={`/${currentGif}`}
+            alt="SoPet companion"
+            fill
+            className="object-contain"
+            unoptimized // Important for GIFs to animate properly
+          />
+        </motion.div>
       </div>
 
       {/* Content */}
