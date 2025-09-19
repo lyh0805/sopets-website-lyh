@@ -115,7 +115,7 @@ const FingerTapOverlay = ({ show, onTap, isMobile }: {
   // Create positioning classes based on device type
   const positionClasses = isMobile 
     ? 'absolute inset-0 flex items-center justify-center -translate-x-7 -translate-y-10' // -translate-y-24 = -96px
-    : 'absolute inset-0 flex items-center justify-center -translate-y-34'; // -translate-y-32 = -128px
+    : 'absolute inset-0 flex items-center justify-center -translate-y-32'; // -translate-y-32 = -128px
 
   return (
     <AnimatePresence>
