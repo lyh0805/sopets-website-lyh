@@ -9,18 +9,18 @@ export default function FeatureGallery() {
   
   return (
     <section className="relative py-24 overflow-hidden">
-      {/* Static Pet in Top Left */}
-      <div className="relative top-[170px] right-[-70px] z-20">
+      {/* Static Pet in Top Left - Desktop Only */}
+      <div className="relative top-[170px] right-[-70px] z-20 hidden md:block">
         <motion.div
           initial={{ opacity: 0, x: -50 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 1, delay: 0.5 }}
           whileHover={{ scale: 1.1 }}
-          className="w-24 h-24 md:w-32 md:h-32 cursor-pointer group"
+          className="w-32 h-32 cursor-pointer group"
         >
           <div className="relative w-full h-full">
             <Image
-              src="dragon_naive-flying.gif"
+              src="/dragon_naive-flying.gif"
               alt="SoPet companion"
               fill
               className="object-contain transition-all duration-300"
@@ -29,7 +29,7 @@ export default function FeatureGallery() {
           </div>
         </motion.div>
       </div>
-
+      
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-16">
@@ -49,6 +49,7 @@ export default function FeatureGallery() {
             </p>
           </motion.div>
         </div>
+        
         {/* YouTube Video Container */}
         <div className="relative rounded-xl overflow-hidden aspect-[4/3] lg:aspect-[16/9] mb-8 bg-gray-900">
           <iframe

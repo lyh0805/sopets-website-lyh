@@ -20,8 +20,9 @@ const Hero = () => {
   const formRef = useRef<HTMLFormElement>(null);
   const petRef = useRef<HTMLDivElement>(null);
 
-  const [isPetHovered, setIsPetHovered] = useState(false);
+  const [isPetActive, setIsPetActive] = useState(false);
   const [currentGif, setCurrentGif] = useState('dragon_naive-sleeping.gif');
+  const [isPetVisible, setIsPetVisible] = useState(true);
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -32,7 +33,22 @@ const Hero = () => {
     const form = formRef.current;
     const pet = petRef.current;
 
-    if (!section || !content || !bg || !logo || !text || !form || !pet) return;
+    if (!section || !content || !bg || !logo || !text || !form) return;
+
+    // Intersection Observer to track when Hero section is visible
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsPetVisible(entry.isIntersecting);
+      },
+      {
+        threshold: 0.75, // Hide pet when less than 10% of Hero is visible
+        rootMargin: '-50px 0px -50px 0px' // Add some margin for better UX
+      }
+    );
+
+    observer.observe(section);
+
+    if (!pet) return;
 
     // Initial animation timeline
     const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
@@ -86,14 +102,16 @@ const Hero = () => {
     });
 
     // Pet parallax effect - moves slightly with scroll
-    gsap.to(pet, {
-      yPercent: -10,
-      scrollTrigger: {
-        trigger: section,
-        start: "top top",
-        scrub: true
-      }
-    });
+    if (pet) {
+      gsap.to(pet, {
+        yPercent: -10,
+        scrollTrigger: {
+          trigger: section,
+          start: "top top",
+          scrub: true
+        }
+      });
+    }
 
     // Mouse move effect for subtle background parallax
     const handleMouseMove = (e: MouseEvent) => {
@@ -110,18 +128,33 @@ const Hero = () => {
     };
 
     window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
+    
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      observer.disconnect();
+    };
   }, []);
 
-  // Handle pet hover states
-  const handlePetHover = () => {
-    setIsPetHovered(true);
+  // Handle pet interaction - works for both hover (desktop) and touch (mobile)
+  const handlePetStart = () => {
+    setIsPetActive(true);
     setCurrentGif('dragon_naive-petting.gif');
   };
 
-  const handlePetLeave = () => {
-    setIsPetHovered(false);
-    setCurrentGif('dragon_naive-idle.gif');
+  const handlePetEnd = () => {
+    setIsPetActive(false);
+    setCurrentGif('dragon_naive-attempt_to_fly.gif');
+  };
+
+  // Touch event handlers for mobile
+  const handleTouchStart = (e: React.TouchEvent) => {
+    e.preventDefault(); // Prevent scrolling when touching the pet
+    handlePetStart();
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    e.preventDefault();
+    handlePetEnd();
   };
 
   return (
@@ -142,31 +175,43 @@ const Hero = () => {
       </div>
 
       {/* Interactive Pet */}
-      <div 
-        ref={petRef}
-        className="fixed bottom-8 left-8 z-20 cursor-pointer"
-        onMouseEnter={handlePetHover}
-        onMouseLeave={handlePetLeave}
-      >
-        <motion.div
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.95 }}
-          className="relative w-24 h-24 md:w-32 md:h-32"
+      {isPetVisible && (
+        <div 
+          ref={petRef}
+          className="fixed bottom-10 left-8 z-20 cursor-pointer select-none"
+          // Desktop hover events
+          onMouseEnter={handlePetStart}
+          onMouseLeave={handlePetEnd}
+          // Mobile touch events
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+          onTouchCancel={handleTouchEnd} // Handle when touch is interrupted
         >
-          <Image
-            src={`/${currentGif}`}
-            alt="SoPet companion"
-            fill
-            className="object-contain"
-            unoptimized // Important for GIFs to animate properly
-          />
-        </motion.div>
-      </div>
+          <motion.div
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
+            className="relative w-24 h-24 md:w-32 md:h-32"
+          >
+            <Image
+              src={`/${currentGif}`}
+              alt="SoPet companion"
+              fill
+              className="object-contain"
+              unoptimized // Important for GIFs to animate properly
+              draggable={false} // Prevent dragging on mobile
+            />
+            {/* Visual feedback for active state */}
+            {isPetActive && (
+              <div className="absolute inset-0 rounded-full bg-purple-400/20 blur-xl animate-pulse" />
+            )}
+          </motion.div>
+        </div>
+      )}
 
       {/* Content */}
-      <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-[calc(100vh-5rem)] flex items-center">
-        <div ref={contentRef} className="max-w-xl">
-          <div ref={logoRef} className="mb-6 max-w-[350px]">
+      <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-[calc(100vh-5rem)] flex items-center sm:items-center md:items-center">
+        <div ref={contentRef} className="max-w-xl mt-[-20vh] sm:mt-0 md:mt-0">
+          <div ref={logoRef} className="mb-4 sm:mb-6 max-w-[280px] sm:max-w-[350px]">
             <Image
               src="/sopets_logo.png"
               alt="SoPets"
@@ -177,11 +222,11 @@ const Hero = () => {
             />
           </div>
           
-          <div ref={textRef} className="mb-8">
-            <h2 className="text-xl text-gray-300 md:text-2xl font-semibold mb-2">
+          <div ref={textRef} className="mb-6 sm:mb-8">
+            <h2 className="text-lg sm:text-xl md:text-2xl text-gray-300 font-semibold mb-2">
               A little friend for your screen 
             </h2>
-            <p className="text-lg text-gray-400 md:text-xl">
+            <p className="text-base sm:text-lg md:text-xl text-gray-400">
               SoPets are gentle digital pets that keep you company while you work, study, or relax. Like a cozy plant on your desk, your SoPet brings calm, warmth, and joy to your digital world.
             </p>
           </div>
@@ -194,7 +239,7 @@ const Hero = () => {
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="mt-0 px-8 py-4 rounded-full font-semibold text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:shadow-lg hover:shadow-purple-500/25 transition-all duration-300"
+            className="mt-0 px-6 sm:px-8 py-3 sm:py-4 rounded-full font-semibold text-white bg-gradient-to-r from-purple-500 to-pink-500 hover:shadow-lg hover:shadow-purple-500/25 transition-all duration-300"
             onClick={() => window.open('https://discord.com/invite/V3YneV4Wzs', '_blank')}
           >
             <span className="flex items-center justify-center">
@@ -209,30 +254,5 @@ const Hero = () => {
     </section>
   );
 };
-
-// Email sign-up and handling code for future reference
-// const [email, setEmail] = useState('');
-// const [isSubmitted, setIsSubmitted] = useState(false);
-// const [isValid, setIsValid] = useState(true);
-
-// const validateEmail = (email: string) => {
-//   return email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/);
-// };
-
-// const handleSubmit = async (e: React.FormEvent) => {
-//   e.preventDefault();
-  
-//   if (!validateEmail(email)) {
-//     setIsValid(false);
-//     return;
-//   }
-  
-//   setIsValid(true);
-//   setIsSubmitted(true);
-//   setTimeout(() => {
-//     setIsSubmitted(false);
-//     setEmail('');
-//   }, 3000);
-// };
 
 export default Hero;

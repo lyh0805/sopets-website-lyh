@@ -18,7 +18,6 @@ const SPINE_ASSETS = {
   atlas: '/new_hatch/Egg_01.atlas'
 };
 
-// const PET_IMAGES = Array.from({ length: 14 }, (_, i) => `/pets/pet_${i}.png`);
 const PET_IMAGES = [
   '/pets/Pawling.png',
   '/pets/Scoops.png', 
@@ -103,7 +102,21 @@ const preloadPetImages = async (isMobile: boolean) => {
 };
 
 // Finger tap overlay component
-const FingerTapOverlay = ({ show, onTap }: { show: boolean; onTap: () => void }) => {
+// Alternative approach using Tailwind classes and conditional positioning
+const FingerTapOverlay = ({ show, onTap, isMobile }: { 
+  show: boolean; 
+  onTap: () => void; 
+  isMobile: boolean; 
+}) => {
+  // Ring sizes
+  const ringSize = isMobile ? 'w-20 h-20' : 'w-32 h-32';
+  const innerSize = isMobile ? 'w-12 h-12' : 'w-20 h-20';
+    
+  // Create positioning classes based on device type
+  const positionClasses = isMobile 
+    ? 'absolute inset-0 flex items-center justify-center -translate-x-7 -translate-y-10' // -translate-y-24 = -96px
+    : 'absolute inset-0 flex items-center justify-center -translate-y-34'; // -translate-y-32 = -128px
+
   return (
     <AnimatePresence>
       {show && (
@@ -111,14 +124,7 @@ const FingerTapOverlay = ({ show, onTap }: { show: boolean; onTap: () => void })
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="absolute inset-0 pointer-events-none z-20"
-          style={{
-            // Position relative to spine skeleton position
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            transform: 'translate(0px, -125px)' // Offset to match spine position but higher
-          }}
+          className={`${positionClasses} pointer-events-none z-20`}
         >
           {/* Pulsing ring around tap area */}
           <motion.div
@@ -131,7 +137,7 @@ const FingerTapOverlay = ({ show, onTap }: { show: boolean; onTap: () => void })
               repeat: Infinity,
               ease: "easeInOut"
             }}
-            className="absolute w-32 h-32 rounded-full border-4 border-white/50"
+            className={`absolute ${ringSize} rounded-full border-4 border-white/50`}
           />
           
           {/* Inner pulsing circle */}
@@ -146,7 +152,7 @@ const FingerTapOverlay = ({ show, onTap }: { show: boolean; onTap: () => void })
               ease: "easeInOut",
               delay: 0.5
             }}
-            className="absolute w-20 h-20 rounded-full bg-white/20"
+            className={`absolute ${innerSize} rounded-full bg-white/20`}
           />
           
           {/* Invisible clickable area */}
@@ -550,10 +556,11 @@ const EggHatchingSection = () => {
                     }}
                   />
                   
-                  {/* Finger tap overlay - Updated condition to show until all 5 taps are done */}
+                  {/* Finger tap overlay - Now includes isMobile prop */}
                   <FingerTapOverlay 
                     show={showFingerPrompt && !isLoading && tapCount < 5} 
-                    onTap={handleTap} 
+                    onTap={handleTap}
+                    isMobile={isMobile}
                   />
                   
                   {isLoading && assetsPreloaded && (

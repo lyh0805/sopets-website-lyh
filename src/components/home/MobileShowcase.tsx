@@ -42,49 +42,6 @@ export default function FeatureGallery() {
           </video>
         </div>
       </div>
-
-      {/* Bottom Animations */}
-      <div className="relative bottom-8 left-0 right-0 z-20 pointer-events-none">
-        <div className="flex justify-between items-end px-8">
-          {/* Left Bottom Animation */}
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 1 }}
-            whileHover={{ scale: 1.1 }}
-            className="w-20 h-20 md:w-28 md:h-28 cursor-pointer group pointer-events-auto"
-          >
-            <div className="relative w-full h-full">
-              <Image
-                src="/dragon-sleeping_robot.gif"
-                alt="SoPet companion left"
-                fill
-                className="object-contain transition-all duration-300"
-                unoptimized
-              />
-            </div>
-          </motion.div>
-
-          {/* Right Bottom Animation */}
-          <motion.div
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 1, delay: 1.2 }}
-            whileHover={{ scale: 1.1 }}
-            className="w-20 h-20 md:w-32 md:h-32 cursor-pointer group pointer-events-auto"
-          >
-            <div className="relative right-[900px] w-full h-full">
-              <Image
-                src="/dragon_pink-excited.gif"
-                alt="SoPet companion right"
-                fill
-                className="object-contain transition-all duration-300 scale-x-[-1]"
-                unoptimized
-              />
-            </div>
-          </motion.div>
-        </div>
-      </div>
     </section>
   );
 }
