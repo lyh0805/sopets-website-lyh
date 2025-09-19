@@ -160,17 +160,6 @@ const PetLoreContainer: React.FC<PetLoreContainerProps> = ({
         {rarity}
       </motion.div>
 
-      {/* Mobile tap indicator */}
-      {isMobile && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: showDescription ? 0 : 0.6 }}
-          className="absolute bottom-3 left-3 z-30 text-white/60 text-xs"
-        >
-          Tap to {showDescription ? 'show video' : 'read more'}
-        </motion.div>
-      )}
-
       {/* Shimmer Effect on Hover/Touch */}
       <div className={`
         absolute inset-0 -translate-x-full transition-transform duration-1000 z-20

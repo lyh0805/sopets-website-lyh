@@ -193,18 +193,6 @@ const LoreSnippetCard: React.FC<LoreSnippetCardProps> = ({
           </div>
         )}
 
-        {/* Mobile tap indicator */}
-        {isMobile && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: showContent ? 0 : 0.8 }}
-            transition={{ duration: 0.3 }}
-            className="absolute bottom-4 right-4 z-30 bg-black/60 backdrop-blur-sm px-3 py-2 rounded-lg text-white/80 text-sm"
-          >
-            Tap to {showContent ? 'show media' : 'read story'}
-          </motion.div>
-        )}
-
         {/* Content Container */}
         <div className="relative z-20 h-full min-h-[500px]">
           <AnimatePresence mode="wait">
