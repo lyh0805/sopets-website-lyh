@@ -134,7 +134,7 @@ const Header = () => {
     return emailRegex.test(email);
   };
 
-  const handleEmailSubmit = async (e) => {
+  const handleEmailSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
     if (!validateEmail(email)) {
