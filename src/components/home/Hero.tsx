@@ -162,7 +162,7 @@ const Hero = () => {
       {/* Background Image */}
       <div ref={bgRef} className="absolute inset-0 z-0">
         <Image
-          src="/splash.png"
+          src="/Splashart_noLOGO.jpg"
           alt="SoPets magical world"
           fill
           sizes="100vw"
