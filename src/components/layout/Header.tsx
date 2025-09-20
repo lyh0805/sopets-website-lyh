@@ -95,6 +95,10 @@ const Header = () => {
   const [isSocialsOpen, setIsSocialsOpen] = useState(false);
   const [isDownloadOpen, setIsDownloadOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [email, setEmail] = useState('');
+  const [emailSubmitted, setEmailSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [emailError, setEmailError] = useState('');
   const pathname = usePathname();
 
   const isActivePage = (path: string) => pathname === path;
@@ -117,7 +121,70 @@ const Header = () => {
     checkDevice();
   }, []);
 
+  // Check if email was already submitted (localStorage)
+  useEffect(() => {
+    const submitted = localStorage.getItem('sopets_email_submitted');
+    if (submitted === 'true') {
+      setEmailSubmitted(true);
+    }
+  }, []);
+
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const handleEmailSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (!validateEmail(email)) {
+      setEmailError('Please enter a valid email address');
+      return;
+    }
+  
+    setIsSubmitting(true);
+    setEmailError('');
+  
+    try {
+      const response = await fetch('/api/submit-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email }),
+      });
+  
+      const data = await response.json();
+  
+      if (response.ok) {
+        // Store in localStorage that email was submitted
+        localStorage.setItem('sopets_email_submitted', 'true');
+        localStorage.setItem('sopets_user_email', email);
+        
+        setEmailSubmitted(true);
+        
+        // Close dropdown after a short delay to show success
+        setTimeout(() => {
+          setIsDownloadOpen(false);
+        }, 2000);
+        
+      } else {
+        setEmailError(data.message || 'Something went wrong. Please try again.');
+      }
+      
+    } catch (error) {
+      console.error('Error submitting email:', error);
+      setEmailError('Network error. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const handleDownload = (href: string) => {
+    if (!emailSubmitted) {
+      return;
+    }
+
     // Create a temporary anchor element to trigger download
     const link = document.createElement('a');
     link.href = href;
@@ -240,7 +307,7 @@ const Header = () => {
               >
                 <span className="relative z-10">Download Beta Here</span>
                 <svg
-                  className={`h-4 w- transition-transform ${isDownloadOpen ? 'rotate-180' : ''}`}
+                  className={`h-4 w-4 transition-transform ${isDownloadOpen ? 'rotate-180' : ''}`}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -257,19 +324,93 @@ const Header = () => {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
                     transition={{ duration: 0.2 }}
-                    className="absolute right-0 mt-3 w-60 rounded-lg bg-black/95 p-3 backdrop-blur-lg"
+                    className="absolute right-0 mt-3 w-80 rounded-lg bg-black/95 p-4 backdrop-blur-lg"
                   >
-                    {downloadLinks.map((download) => (
-                      <motion.button
-                        key={download.name}
-                        onClick={() => handleDownload(download.href)}
-                        className="flex w-full items-center gap-4 rounded-lg px-5 py-3 text-base text-white/70 transition-colors hover:bg-white/10 hover:text-white"
-                        whileHover={{ x: 4 }}
-                      >
-                        <download.icon className="h-6 w-6" />
-                        {download.name}
-                      </motion.button>
-                    ))}
+                    {!emailSubmitted ? (
+                      // Email collection form
+                      <div>
+                        <h3 className="text-white font-semibold mb-3 text-center">
+                          Get Early Access to SoPets Beta
+                        </h3>
+                        <p className="text-white/70 text-sm mb-4 text-center">
+                          Enter your email to unlock the download links
+                        </p>
+                        
+                        <form onSubmit={handleEmailSubmit} className="space-y-3">
+                          <div>
+                            <input
+                              type="email"
+                              value={email}
+                              onChange={(e) => {
+                                setEmail(e.target.value);
+                                setEmailError('');
+                              }}
+                              placeholder="Enter your email address"
+                              className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-purple-500 focus:bg-white/15 transition-all"
+                              required
+                              disabled={isSubmitting}
+                            />
+                            {emailError && (
+                              <p className="text-red-400 text-xs mt-1">{emailError}</p>
+                            )}
+                          </div>
+                          
+                          <motion.button
+                            type="submit"
+                            disabled={isSubmitting || !email}
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            className="w-full py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-semibold rounded-lg hover:from-purple-600 hover:to-pink-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+                          >
+                            {isSubmitting ? (
+                              <>
+                                <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                  <path className="opacity-75" fill="currentColor" d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                Submitting...
+                              </>
+                            ) : (
+                              'Unlock Downloads'
+                            )}
+                          </motion.button>
+                        </form>
+                        
+                        <p className="text-white/50 text-xs text-center mt-3">
+                          We'll only use your email for SoPets updates and beta access
+                        </p>
+                      </div>
+                    ) : (
+                      // Download links (unlocked)
+                      <div>
+                        <div className="text-center mb-4">
+                          <div className="inline-flex items-center gap-2 text-green-400 font-semibold mb-2">
+                            <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                            Access Unlocked!
+                          </div>
+                          <p className="text-white/70 text-sm">
+                            Choose your platform to download SoPets Beta
+                          </p>
+                        </div>
+                        
+                        {downloadLinks.map((download) => (
+                          <motion.button
+                            key={download.name}
+                            onClick={() => handleDownload(download.href)}
+                            className="flex w-full items-center gap-4 rounded-lg px-5 py-3 text-base text-white/70 transition-colors hover:bg-white/10 hover:text-white mb-2 last:mb-0"
+                            whileHover={{ x: 4 }}
+                          >
+                            <download.icon className="h-6 w-6" />
+                            {download.name}
+                            <svg className="h-4 w-4 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                          </motion.button>
+                        ))}
+                      </div>
+                    )}
                   </motion.div>
                 )}
               </AnimatePresence>
